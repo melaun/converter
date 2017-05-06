@@ -115,6 +115,7 @@ public class DownloadManager {
                 for (int i = 0; i < multiPart.getCount(); i++) {
                     MimeBodyPart part = (MimeBodyPart) multiPart.getBodyPart(i);
                     String fileName = part.getFileName();
+                    
                     if (Part.ATTACHMENT.equalsIgnoreCase(part.getDisposition())) {
                         if (!new File(path + fileName).exists()) {
                             File file = new File(path + fileName);

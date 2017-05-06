@@ -66,7 +66,11 @@ public class Converter {
      */
     private String savePath = System.getProperty("user.home") + File.separator + "Documents" + File.separator + "prijem";
 
-//private String savePath = "P:\\" + File.separator + "prijem" + File.separator;
+    //private String savePath = "P:\\" + File.separator + "prijem" + File.separator;
+    /**
+     * cesta pro vzdalené ukládání nových dokladů
+     */
+    private String externalPath = "P:\\" + File.separator + "prijem" + File.separator;
     /**
      * výchozí velikost pro soubor logu 1MB
      */
@@ -119,7 +123,7 @@ public class Converter {
      * @param dodavatele
      */
     public void convertMsq(ArrayList<Dodavatel> dodavatele) {
-        cm = new ConverterManager(homePath, savePath);
+        cm = new ConverterManager(homePath, savePath, externalPath);
         dodavatele.stream().forEach((d) -> {
             cm.readFiles(d);
         });
@@ -201,12 +205,14 @@ public class Converter {
                 return null;
             }
         };
+
         pns.addFilialka(hut, "5000033400");
         pns.addFilialka(tocnik, "5000055724");
         pns.addFilialka(milin, "5000060925");
         pns.addFilialka(nemocnice, "5000057714");
         pns.addFilialka(pec, "5000065344");
         pns.addFilialka(zdice, "5000064794");
+        pns.addFilialka(kozarovice, "5000067084");
         pns.setName("1393");
         pns.setFilter("podzimek.vojtech@korunapb.cz", "elektronická data", "PNS");
 
@@ -439,7 +445,7 @@ public class Converter {
         dodavatele.add(alimpex);
         dodavatele.add(unikom);
         dodavatele.add(vodicka);
-        dodavatele.add(toner);
+        //dodavatele.add(toner);
 
         return dodavatele;
     }

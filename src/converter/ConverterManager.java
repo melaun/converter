@@ -19,27 +19,29 @@ import java.util.logging.Logger;
  */
 public class ConverterManager {
 
+    private final String externalPath;
     private final String homePath;
     private final String savePath;
     private int counter;
     private final Logger logger = Logger.getLogger("ConverterLog");
     private ArrayList<Document> documents;
 
-    public ConverterManager(String homePath, String savePath) {
+    public ConverterManager(String homePath, String savePath, String externalPath) {
         this.homePath = homePath;
         this.savePath = savePath;
+        this.externalPath = externalPath;
         this.documents = new ArrayList<>();
         /**
          * Pokud neexistuje savePath vytvorim ji
          */
         if (!new File(savePath).exists()) {
             new File(savePath).mkdir();
-            logger.info("Byla vytvorena cesta "+savePath);
+            logger.info("Byla vytvorena cesta " + savePath);
         }
     }
 
     public void readFiles(Dodavatel d) {
-        logger.info("------ Konvertuji doklad od "+d.getName());
+        logger.info("------ Konvertuji doklad od " + d.getName());
         counter = 0;
         File folder = new File(homePath + File.separator + d.getName());
         for (final File fileEntry : folder.listFiles()) {
@@ -51,32 +53,35 @@ public class ConverterManager {
                     File f = new File(savePath + File.separator + d.getName());
                     if (!f.exists()) {
                         f.mkdir();
-                        logger.info("Byla vytvorena cesta "+savePath + File.separator + d.getName());
+                        logger.info("Byla vytvorena cesta " + savePath + File.separator + d.getName());
                     }
                     // jen pokud je dokument nacten
                     if (doc != null) {
                         // jen pokud uz neni covertovan
                         if (!new File(savePath + File.separator + d.getName() + File.separator + doc.getSaveName()).exists()) {
-                            // ulozim dokument
+                            // ulozim dokument na save path
                             doc.saveDocument(savePath + File.separator + d.getName() + File.separator + doc.getSaveName());
-                            logger.info("Novy podklad od "+d.getName()+" - " + doc.getSaveName() + " byl ulozen.");counter++;
+                            logger.info("Novy podklad od " + d.getName() + " - " + doc.getSaveName() + " byl ulozen na "+savePath);
+
+                            // ulozi dokument na external path
+                            doc.saveDocument(externalPath + File.separator + d.getName() + File.separator + doc.getSaveName());
+
+                            logger.info("Novy podklad od " + d.getName() + " - " + doc.getSaveName() + " byl ulozen na "+externalPath);
+                            counter++;
                             documents.add(doc);
                             d.addDocument(doc);
                         }
                     }
                 } catch (IOException ex) {
-                    logger.log(Level.SEVERE,"Read files - ukladani podkladu "+ doc.getSaveName(),ex);
+                    logger.log(Level.SEVERE, "Read files - ukladani podkladu " + doc.getSaveName(), ex);
                 }
             }
         }
-        logger.info("Od "+d.getName()+" jsem konvertoval "+counter+" podkladu.");  
+        logger.info("Od " + d.getName() + " jsem konvertoval " + counter + " podkladu.");
     }
 
     public ArrayList<Document> getDocuments() {
         return documents;
     }
-    
-    
-
 
 }

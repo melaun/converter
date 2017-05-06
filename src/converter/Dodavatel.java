@@ -46,7 +46,7 @@ public abstract class Dodavatel implements DocReader {
     /**
      * pocet dnu dozadu ve kterych budu vzhledavat
      */
-    private int days = 30;
+    private int days = 2;
     /**
      * Datum od ktereho budu vzhledavat smerem k dnesku
      */
@@ -54,7 +54,7 @@ public abstract class Dodavatel implements DocReader {
     /**
      * Vyhledavaci pravidlo pro datum
      */
-    private ReceivedDateTerm dateTerm;
+    private SearchTerm dateTerm;
     /**
      * Aktualne zapracovavana filialka
      */
@@ -77,7 +77,9 @@ public abstract class Dodavatel implements DocReader {
         docs = new ArrayList<>();
         filialky = new ArrayList();
         mezniDate = new Date(new Date().getTime() - (days * DAY_IN_MS));
-        dateTerm = new ReceivedDateTerm(ComparisonTerm.GE, mezniDate);
+        
+        dateTerm = new ReceivedDateTerm(ComparisonTerm.GT, mezniDate);
+      
     }
 
     /**
@@ -97,8 +99,9 @@ public abstract class Dodavatel implements DocReader {
      * @param email edmail dle ktereho vyhledavam
      */
     public void setFilter(String email) {
-        term = new FromStringTerm((email));
-        term = new AndTerm(term, dateTerm);
+        SearchTerm term1 = new FromStringTerm((email));
+        term = new AndTerm(term1, dateTerm);
+        
     }
 
     /**
@@ -109,8 +112,8 @@ public abstract class Dodavatel implements DocReader {
      * @param subject predmet podle ktereho vyhledavam
      */
     public void setFilter(String email, String subject) {
-        term = new AndTerm(new FromStringTerm((email)), new SubjectTerm(subject));
-        term = new AndTerm(term, dateTerm);
+        SearchTerm term1 = new AndTerm(new FromStringTerm((email)), new SubjectTerm(subject));
+        term = new AndTerm(term1, dateTerm);
     }
 
     /**
@@ -153,6 +156,14 @@ public abstract class Dodavatel implements DocReader {
 
     public int getDocumentCount() {
         return docs.size();
+    }
+    
+    public int getDayBack(){
+        return days;
+    }
+    
+    public void setDayBack(int days){
+        this.days = days;
     }
 
     /**
