@@ -22,7 +22,6 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.Iterator;
 import java.util.logging.FileHandler;
-import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.logging.SimpleFormatter;
 
@@ -124,6 +123,7 @@ public class Converter {
      */
     public void convertMsq(ArrayList<Dodavatel> dodavatele) {
         cm = new ConverterManager(homePath, savePath, externalPath);
+
         dodavatele.stream().forEach((d) -> {
             cm.readFiles(d);
         });
@@ -375,12 +375,13 @@ public class Converter {
         unikom.addFilialka(nemocnice, "004");
         unikom.addFilialka(pec, "002");
         unikom.addFilialka(vo, "006");
+        unikom.addFilialka(cashPB, "001");
         unikom.setFilter("@unikom.cz");
 
         /**
          * Definuji toner
          */
-        Dodavatel toner = new Dodavatel("Toner") {
+        Dodavatel toner = new Dodavatel("1582") {
             @Override
             public Document readFile(String path) {
                 CSV csv = new CSV();
@@ -389,13 +390,23 @@ public class Converter {
                 csv.colDPH = "vatcode";
                 csv.colCount = "basket";
                 csv.colNC = "p_w_vc";
+                csv.filialka = "office_id";
                 Document doc = new Document();
                 File f = new File(path);
-                String number = f.getName().substring(0, f.getName().length() - 4);
-                doc.setRows(csv.getItems(path, ',', "Windows-1250"));
-                for (Row r : doc.getRows()) {
+                String number = String.valueOf(System.currentTimeMillis());
+                
+                try {
+                    number = f.getName().substring(19, f.getName().length() - 0);
+                } catch (Exception e) {
+
+                }
+                ArrayList<Row> rows = csv.getItems(path, ',', "Windows-1250");
+
+                for (Row r : rows) {
                     r.docNumber = number;
                 }
+                rows = chooseFilialka(rows);
+                doc.setRows(rows);
                 doc.setSaveName(number + ".csv");
                 doc.setNumberContractor(number);
                 doc.setName("Toner");
@@ -403,6 +414,10 @@ public class Converter {
             }
         };
         toner.setFilter("@toner-rl.cz");
+        toner.addFilialka(nemocnice, "6978");
+        toner.addFilialka(pec, "5874");
+        toner.addFilialka(kozarovice, "1432");
+        toner.addFilialka(milin, "1234");
         /**
          * PAC
          */
@@ -445,7 +460,7 @@ public class Converter {
         dodavatele.add(alimpex);
         dodavatele.add(unikom);
         dodavatele.add(vodicka);
-        //dodavatele.add(toner);
+        dodavatele.add(toner);
 
         return dodavatele;
     }
@@ -482,7 +497,7 @@ public class Converter {
      *
      */
     public void printIt() {
-      
+
         for (Dodavatel d : dodavatele) {
             d.print();
             System.out.println("---- " + d.getName() + " ---");
