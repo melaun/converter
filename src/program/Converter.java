@@ -15,13 +15,20 @@ import converter.document.Row;
 import downloader.DownloadManager;
 import downloader.EmailConnector;
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.Iterator;
+import java.util.Properties;
 import java.util.logging.FileHandler;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.logging.SimpleFormatter;
 
@@ -63,13 +70,14 @@ public class Converter {
     /**
      * Výchozi cesta pro konvertovane doklady
      */
-    private String savePath = System.getProperty("user.home") + File.separator + "Documents" + File.separator + "prijem";
+    private String savePath = "";
 
     //private String savePath = "P:\\" + File.separator + "prijem" + File.separator;
     /**
-     * cesta pro vzdalené ukládání nových dokladů
+     * cesta pro vzdalené ukládání nových dokladů je to kopie savePath ale
+     * nedoplnuje se o smazane
      */
-    private String externalPath = "P:\\" + File.separator + "prijem" + File.separator;
+    private String externalPath = "";
     /**
      * výchozí velikost pro soubor logu 1MB
      */
@@ -78,6 +86,62 @@ public class Converter {
      * list s dodavateli
      */
     private ArrayList<Dodavatel> dodavatele = new ArrayList<>();
+
+    public Converter() {
+
+        if (!new File(homePath + "config.properties").exists()) {
+            //make default file
+            createDefaultConfigFile();
+            System.out.println("program.Converter.<init>()");
+        }
+        loadConfig();
+
+    }
+
+    private void loadConfig() {
+        FileInputStream input = null;
+        try {
+            input = new FileInputStream(homePath + "config.properties");
+            Properties prop = new Properties();
+            prop.load(input);
+            savePath = prop.getProperty("savePath");
+            externalPath = prop.getProperty("extraSavePath");
+        } catch (FileNotFoundException ex) {
+            Logger.getLogger(Converter.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (IOException ex) {
+            Logger.getLogger(Converter.class.getName()).log(Level.SEVERE, null, ex);
+        } finally {
+            try {
+                input.close();
+            } catch (IOException ex) {
+                Logger.getLogger(Converter.class.getName()).log(Level.SEVERE, null, ex);
+            }
+        }
+    }
+
+    private void createDefaultConfigFile() {
+        Properties prop = new Properties();
+        OutputStream output = null;
+        try {
+
+            output = new FileOutputStream(homePath + "config.properties");
+
+            prop.setProperty("savePath", System.getProperty("user.home") + File.separator + "Documents" + File.separator + "prijem");
+            prop.setProperty("extraSavePath", "P:" + File.separator + "prijem" + File.separator);
+            prop.store(output, homePath);
+
+        } catch (FileNotFoundException ex) {
+            Logger.getLogger(Converter.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (IOException ex) {
+            Logger.getLogger(Converter.class.getName()).log(Level.SEVERE, null, ex);
+        } finally {
+            try {
+                output.close();
+            } catch (IOException ex) {
+                Logger.getLogger(Converter.class.getName()).log(Level.SEVERE, null, ex);
+            }
+        }
+    }
 
     /**
      * inicializace loggeru log se uklada do adresare viz DefaultLogPath
@@ -224,11 +288,11 @@ public class Converter {
             public Document readFile(String path) {
                 try {
                     CSV csv = new CSV();
-                    csv.colCount = "Odběratel (fakt. adresa) - stát";
+                    csv.colCount = "Odběratel (fakt. adresa) - PSČ";
                     csv.colDPH = "Dodavatel - IČO";
                     csv.colNumber = "Dodavatel - SWIFT";
                     csv.colNC = "Cena s DPH v sazbě 0% - vyúčtování";
-                    csv.colName = "Odběratel - IČO";
+                    csv.colName = "Odběratel (fakt. adresa) - stát";
                     csv.colSpecial = "Header";
                     csv.date = "Datum vystavení";
                     csv.docNumber = "Variabilní symbol";
@@ -394,7 +458,7 @@ public class Converter {
                 Document doc = new Document();
                 File f = new File(path);
                 String number = String.valueOf(System.currentTimeMillis());
-                
+
                 try {
                     number = f.getName().substring(19, f.getName().length() - 0);
                 } catch (Exception e) {

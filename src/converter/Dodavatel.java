@@ -46,7 +46,7 @@ public abstract class Dodavatel implements DocReader {
     /**
      * pocet dnu dozadu ve kterych budu vzhledavat
      */
-    private int days = 2;
+    private int days = 30;
     /**
      * Datum od ktereho budu vzhledavat smerem k dnesku
      */
