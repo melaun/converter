@@ -5,8 +5,6 @@
  */
 package converter.document;
 
-import converter.document.Document;
-
 
 /**
  *

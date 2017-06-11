@@ -62,11 +62,11 @@ public class Converter {
     /**
      * Vychozi cesta k logu
      */
-    private String defaultLogPath = System.getProperty("user.home") + File.separator + ".JavaConverter" + File.separator;
+    private String defaultLogPath = System.getProperty("user.home") + File.separator + "JavaConverter" + File.separator;
     /**
      * Výchozi cesta pro ukladani dokladu od dodavatele
      */
-    private String homePath = System.getProperty("user.home") + File.separator + ".JavaConverter" + File.separator;
+    private String homePath = System.getProperty("user.home") + File.separator + "JavaConverter" + File.separator;
     /**
      * Výchozi cesta pro konvertovane doklady
      */
@@ -86,18 +86,21 @@ public class Converter {
      * list s dodavateli
      */
     private ArrayList<Dodavatel> dodavatele = new ArrayList<>();
-
+    /**
+     * vytvori Converter
+     */
     public Converter() {
-
         if (!new File(homePath + "config.properties").exists()) {
             //make default file
             createDefaultConfigFile();
-            System.out.println("program.Converter.<init>()");
         }
         loadConfig();
 
     }
 
+    /**
+     * načte nastavení z config file
+     */
     private void loadConfig() {
         FileInputStream input = null;
         try {
@@ -119,13 +122,15 @@ public class Converter {
         }
     }
 
+    /**
+     * vytvori vychozi config file
+     */
     private void createDefaultConfigFile() {
         Properties prop = new Properties();
         OutputStream output = null;
         try {
-
+            File file = new File(homePath + "config.properties");
             output = new FileOutputStream(homePath + "config.properties");
-
             prop.setProperty("savePath", System.getProperty("user.home") + File.separator + "Documents" + File.separator + "prijem");
             prop.setProperty("extraSavePath", "P:" + File.separator + "prijem" + File.separator);
             prop.store(output, homePath);
@@ -575,7 +580,10 @@ public class Converter {
 
         }
     }
-
+    /**
+     * vrati dokumenty od vsech dodavatelu
+     * @return arraylist dokumentu
+     */
     public ArrayList<Document> getAllDocuments() {
         ArrayList<Document> documents = new ArrayList<>();
         for (Dodavatel d : dodavatele) {

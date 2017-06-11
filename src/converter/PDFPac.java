@@ -22,13 +22,13 @@ import org.apache.commons.logging.*;
  * @author Podzimek Vojtěch
  */
 public class PDFPac {
-
+    
     private ArrayList<Row> rows = null;
     private final Logger logger = Logger.getLogger("ConverterLog");
     private String filialkaID = "";
     private String line = "";
     private List<String> errs = null;
-
+    
     public ArrayList<Row> getRows(String url) {
         errs = new ArrayList<>();
         //vemu text z pdf
@@ -40,15 +40,15 @@ public class PDFPac {
         
         return makeRows(lineWithItems);
     }
-
+    
     private ArrayList makeRows(ArrayList<String> lines) {
         rows = new ArrayList<>();
-        for (String line : lines){
+        for (String line : lines) {
             rows.add(makeRow(line));
         }
         return rows;
     }
-
+    
     private Row makeRow(String line) {
         this.line = line;
         Row row = new Row();
@@ -57,12 +57,12 @@ public class PDFPac {
         String name = "";
         String[] words = line.split(" ");
         String word = words[0];
-
+        
         if (isNumber(word)) {
             row.code = word;
         }
         for (count = 1; count < words.length; count++) {
-            if (countTest(words[count])) {
+            if (countTest(words[count]) && isDouble(words[count + 1])) {
                 row.count = makeClearCount(words[count]);
                 break;
             } else {
@@ -72,37 +72,37 @@ public class PDFPac {
         }
         row.filialka = filialkaID;
         row.name = name;
-        String priceAll = words[count+1].replace(",", ".");
+        String priceAll = words[count + 1].replace(",", ".");
         row.nc = calculatePrice(row.count, priceAll);
         return row;
     }
-
+    
     private String makeClearCount(String word) {
-
+        
         return word.substring(0, word.length() - 2);
     }
-
+    
     private String calculatePrice(String count, String priceAll) {
-        try{
-        Double mnozstvi = Double.parseDouble(count);
-        Double cena = Double.parseDouble(priceAll);
-        Double celkem = cena / mnozstvi;
-        Double cc = Math.round(celkem * 100.0) / 100.0;
-        return String.valueOf(cc);
-        }catch(NumberFormatException ex ){
+        try {
+            Double mnozstvi = Double.parseDouble(count);
+            Double cena = Double.parseDouble(priceAll);
+            Double celkem = cena / mnozstvi;
+            Double cc = Math.round(celkem * 100.0) / 100.0;
+            return String.valueOf(cc);
+        } catch (NumberFormatException ex) {
             logger.warning("Chyba v radku " + line);
             errs.add(line);
         }
         
         return "99.99";
-
+        
     }
-
+    
     private boolean countTest(String word) {
-        if ((word.toLowerCase().contains("ks") || word.contains("kg") ) && isNumber(word.substring(0, word.length()-2))) {
+        if ((word.toLowerCase().contains("ks") || word.contains("kg")) && isNumber(word.substring(0, word.length() - 2))) {
             return true;
         }
-     
+        
         return false;
     }
 
@@ -119,17 +119,17 @@ public class PDFPac {
             PDFTextStripper pdfStripper = new PDFTextStripper();
             text = pdfStripper.getText(pdDoc);
             pdDoc.close();
-           
+            
         } catch (IOException ex) {
             logger.warning("PDFPac soubor nebyl nalezen " + url + "chyba " + ex);
         }
         return text;
     }
-
+    
     private String[] parseText(String text) {
         // rozdeli text na radky
         return text.split(System.getProperty("line.separator"));
-
+        
     }
 
     /**
@@ -171,11 +171,20 @@ public class PDFPac {
             return false;
         }
     }
-
+    
+    private boolean isDouble(String s) {
+        try {
+            s = s.replace(".","");
+            s = s.replace(",", ".");
+            Double.parseDouble(s);
+            return true;
+        } catch (NumberFormatException ex) {
+            return false;
+        }
+    }
+    
     public List<String> getErrs() {
         return errs;
     }
     
-    
-
 }

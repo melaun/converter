@@ -27,6 +27,7 @@ public class main  {
         //launch(args);
         ArrayList<Dodavatel> dodavatele;
         EmailConnector ec = new EmailConnector("imap.forpsi.com", "edi@korunapb.cz", "852456ban");
+        
         if (args.length > 0) {
             if (args[0].equals("-d")) {
                 System.out.println("Pouštím aplikaci s výpisem logu");

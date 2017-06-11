@@ -40,9 +40,9 @@ public class DownloadManager {
     private Dodavatel dodavatel = null;
 
     /**
-     *
-     * @param ec
-     * @param homePath
+     * Vytvori DownloadManager 
+     * @param ec email connector
+     * @param homePath cesta kam se ulozi prilohy
      */
     public DownloadManager(EmailConnector ec, String homePath) {
 
