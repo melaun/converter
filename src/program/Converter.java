@@ -394,7 +394,8 @@ public class Converter {
         alimpex.addFilialka(milin, "130355");
         alimpex.addFilialka(nemocnice, "128253");
         alimpex.addFilialka(pec, "133027");
-        alimpex.addFilialka(zdice, "133901");
+        alimpex.addFilialka(kozarovice, "133901");
+        //alimpex.addFilialka(zdice, "133901");
         alimpex.setFilter("@alimpex.cz");
 
         /**
