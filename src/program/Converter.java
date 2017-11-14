@@ -19,7 +19,6 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.InputStream;
 import java.io.OutputStream;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -488,6 +487,8 @@ public class Converter {
         toner.addFilialka(pec, "5874");
         toner.addFilialka(kozarovice, "1432");
         toner.addFilialka(milin, "1234");
+        toner.addFilialka(tocnik, "2334");
+        toner.addFilialka(zdice, "2334");
         /**
          * PAC
          */
@@ -519,6 +520,7 @@ public class Converter {
         pac.addFilialka(milin, "312114");
         pac.addFilialka(zdice, "202688");
         pac.addFilialka(kozarovice, "325073");
+        pac.addFilialka(tocnik, "202638");
         pac.setFilter("@pekarnahorovice.cz", "Faktura");
 
         /**
