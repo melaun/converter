@@ -46,6 +46,7 @@ public class Converter {
     private final String hut = "17";
     private final String cashPB = "01";
     private final String vo = "31";
+    private final String jablonna = "25";
     /**
      *
      */
@@ -69,9 +70,8 @@ public class Converter {
     /**
      * Výchozi cesta pro konvertovane doklady
      */
-    private String savePath = "";
-
-    //private String savePath = "P:\\" + File.separator + "prijem" + File.separator;
+    
+    private String savePath = "P:\\" + File.separator + "prijem" + File.separator;
     /**
      * cesta pro vzdalené ukládání nových dokladů je to kopie savePath ale
      * nedoplnuje se o smazane
@@ -85,6 +85,7 @@ public class Converter {
      * list s dodavateli
      */
     private ArrayList<Dodavatel> dodavatele = new ArrayList<>();
+
     /**
      * vytvori Converter
      */
@@ -207,7 +208,72 @@ public class Converter {
      */
     public ArrayList<Dodavatel> initDodavatele() {
         /**
-         * Definuji PNS
+         * Definuji PNS denni
+         */
+        Dodavatel pnsD = new Dodavatel("1393") {
+
+            @Override
+            public Document readFile(String path) {
+                try {
+                    x`x`CSV csv = new CSV();
+                    csv.colCount = "Mn. [KS]";
+                    csv.colDPH = "DPH";
+                    csv.colEan = "EAN Bez.S.";
+                    csv.colNC = "OC";
+                    csv.colName = "Nazev";
+                    csv.colSpecial = "T";
+                    csv.date = "Datum Dod.";
+                    csv.docNumber = "Dod.L.";
+                    csv.filialka = "POS";
+
+                    Document doc = new Document();
+                    ArrayList<Row> rows = csv.getItems(path, ';', "Windows-1250");
+
+                    String datum = rows.get(0).docDate;
+                    SimpleDateFormat sdf = new SimpleDateFormat("yyyymmdd");
+                    if (datum.equals("")) {
+                        return null;
+                    }
+                    Date dat = sdf.parse(datum);
+                    sdf.applyPattern("yyyymmdd");
+                    datum = sdf.format(dat);
+                    /**
+                     * musim pres iterator kvuli mazani radku v klasickem loopu
+                     * to nelze
+                     */
+                    for (Iterator<Row> iterator = rows.iterator(); iterator.hasNext();) {
+                        Row r = iterator.next();
+                        r.docDate = datum;
+                        if (r.special.equals("R")) {
+                            r.count = String.valueOf(Double.valueOf(r.count) * -1);
+                        }
+                        
+                    }
+                    /**
+                     * Choose filialky
+                     */
+                    rows = chooseFilialka(rows);
+                    doc.setDate(datum);
+                    doc.setFilialka(getActualFilialka());
+                    doc.setRows(rows);
+                    doc.setName("PNSD");
+                    String number = doc.getRows().get(0).docNumber;
+
+                    doc.setDate(datum);
+                    doc.setDate(number);
+                    doc.setSaveName(datum + "_" + number + ".csv");
+                    return doc;
+                } catch (ParseException ex) {
+                    System.err.println("Nasatveni datumu nelze provest " + this.getName() + " " + ex);
+                }
+                return null;
+            }
+        };
+        pnsD.addFilialka(jablonna, "6000056063");
+        pnsD.setName("1393");
+        pnsD.setFilter("podzimek.vojtech@korunapb.cz", "elektronická data", "data za dodávky za dny");
+        /**
+         * Definuji PNS mesicni
          */
         Dodavatel pns = new Dodavatel("1393") {
 
@@ -250,7 +316,6 @@ public class Converter {
                             iterator.remove();
                         }
                     }
-
                     /**
                      * Choose filialky
                      */
@@ -264,11 +329,9 @@ public class Converter {
                     doc.setDate(datum);
                     doc.setDate(number);
                     doc.setSaveName(datum + "_" + number + ".csv");
-
                     return doc;
                 } catch (ParseException ex) {
                     System.err.println("Nasatveni datumu nelze provest " + this.getName() + " " + ex);
-
                 }
                 return null;
             }
@@ -489,6 +552,7 @@ public class Converter {
         toner.addFilialka(milin, "1234");
         toner.addFilialka(tocnik, "2334");
         toner.addFilialka(zdice, "2334");
+        toner.addFilialka(jablonna, "3412");
         /**
          * PAC
          */
@@ -527,12 +591,13 @@ public class Converter {
          * Nacteni dodavatelu
          */
         dodavatele = new ArrayList<>();
-        dodavatele.add(pac);
-        dodavatele.add(pns);
-        dodavatele.add(alimpex);
-        dodavatele.add(unikom);
-        dodavatele.add(vodicka);
-        dodavatele.add(toner);
+//        dodavatele.add(pac);
+//        dodavatele.add(pns);
+        dodavatele.add(pnsD);
+//        dodavatele.add(alimpex);
+//        dodavatele.add(unikom);
+//        dodavatele.add(vodicka);
+//        dodavatele.add(toner);
 
         return dodavatele;
     }
@@ -583,8 +648,10 @@ public class Converter {
 
         }
     }
+
     /**
      * vrati dokumenty od vsech dodavatelu
+     *
      * @return arraylist dokumentu
      */
     public ArrayList<Document> getAllDocuments() {
