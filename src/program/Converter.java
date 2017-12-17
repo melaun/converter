@@ -70,7 +70,7 @@ public class Converter {
     /**
      * Výchozi cesta pro konvertovane doklady
      */
-    
+
     private String savePath = "P:\\" + File.separator + "prijem" + File.separator;
     /**
      * cesta pro vzdalené ukládání nových dokladů je to kopie savePath ale
@@ -215,7 +215,7 @@ public class Converter {
             @Override
             public Document readFile(String path) {
                 try {
-                    x`x`CSV csv = new CSV();
+                    CSV csv = new CSV();
                     csv.colCount = "Mn. [KS]";
                     csv.colDPH = "DPH";
                     csv.colEan = "EAN Bez.S.";
@@ -247,7 +247,7 @@ public class Converter {
                         if (r.special.equals("R")) {
                             r.count = String.valueOf(Double.valueOf(r.count) * -1);
                         }
-                        
+
                     }
                     /**
                      * Choose filialky
@@ -270,8 +270,10 @@ public class Converter {
             }
         };
         pnsD.addFilialka(jablonna, "6000056063");
+        pnsD.addFilialka(zdice, "6000051461");
+        pnsD.addFilialka(tocnik, "6000040892");
         pnsD.setName("1393");
-        pnsD.setFilter("podzimek.vojtech@korunapb.cz", "elektronická data", "data za dodávky za dny");
+        pnsD.setFilter("mailbot@pns.cz", "elektronická data", "data za dodávky za dny");
         /**
          * Definuji PNS mesicni
          */
@@ -345,7 +347,7 @@ public class Converter {
         pns.addFilialka(zdice, "5000064794");
         pns.addFilialka(kozarovice, "5000067084");
         pns.setName("1393");
-        pns.setFilter("podzimek.vojtech@korunapb.cz", "elektronická data", "PNS");
+        pns.setFilter("mailbot@pns.cz", "elektronická data", "PNS");
 
         /**
          * Definuji Vodicku
@@ -457,8 +459,51 @@ public class Converter {
         alimpex.addFilialka(nemocnice, "128253");
         alimpex.addFilialka(pec, "133027");
         alimpex.addFilialka(kozarovice, "133901");
-        //alimpex.addFilialka(zdice, "133901");
+        alimpex.addFilialka(tocnik, "27050");
+        alimpex.addFilialka(jablonna, "12365");
         alimpex.setFilter("@alimpex.cz");
+
+        Dodavatel alimpexServus = new Dodavatel("0093") {
+            @Override
+            public Document readFile(String path) {
+
+                DBF dbf = new DBF();
+                dbf.colName = "NAME";
+                dbf.colEan = "EAN";
+                dbf.colCount = "BASKET";
+                dbf.colNC = "P_W_VC";
+                dbf.colNumber = "PLU";
+                dbf.colFilialka = "ID_SUP";
+
+                Document doc = new Document();
+                ArrayList<Row> rows = dbf.getRows(path, "CP852");
+
+                File f = new File(path);
+                String fileName = f.getName();
+                String[] spe = fileName.split("_");
+                if (spe.length > 0) {
+                    String docNumber = spe[1];
+                    String filialka = spe[0];
+                    for (Row r : rows) {
+                        r.docNumber = docNumber;
+//                        System.out.println("filialka: "+filialka);
+                        r.filialka = filialka;
+
+                    }
+                    doc.setName("0093");
+                    rows = chooseFilialka(rows);
+                    doc.setNumberContractor(docNumber);
+                    doc.setFilialka(getActualFilialka());
+                    doc.setRows(rows);
+                    doc.setSaveName(docNumber + ".csv");
+                }
+
+                return doc;
+
+            }
+        };
+        alimpexServus.addFilialka(jablonna, "12365");
+        alimpexServus.setFilter("@servus-vlasim.cz");
 
         /**
          * Definuji Unikom
@@ -525,7 +570,7 @@ public class Converter {
                 csv.filialka = "office_id";
                 Document doc = new Document();
                 File f = new File(path);
-                String number = String.valueOf(System.currentTimeMillis());
+                String number = f.getName();
 
                 try {
                     number = f.getName().substring(19, f.getName().length() - 0);
@@ -591,13 +636,14 @@ public class Converter {
          * Nacteni dodavatelu
          */
         dodavatele = new ArrayList<>();
-//        dodavatele.add(pac);
-//        dodavatele.add(pns);
+        dodavatele.add(pac);
+        dodavatele.add(pns);
         dodavatele.add(pnsD);
-//        dodavatele.add(alimpex);
-//        dodavatele.add(unikom);
-//        dodavatele.add(vodicka);
-//        dodavatele.add(toner);
+        dodavatele.add(alimpex);
+        dodavatele.add(alimpexServus);
+        dodavatele.add(unikom);
+        dodavatele.add(vodicka);
+        dodavatele.add(toner);
 
         return dodavatele;
     }
