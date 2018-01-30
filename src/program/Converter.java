@@ -512,31 +512,46 @@ public class Converter {
             @Override
             public Document readFile(String path) {
 
-                DBF dbf = new DBF();
-                dbf.colName = "NAZEV";
-                dbf.colEan = "EAN1";
-                dbf.colCount = "MN";
-                dbf.colNC = "CJ";
-                dbf.colDPH = "SAZDPH";
-                dbf.colDocNumber = "CISDOK";
-                dbf.colDate = "DATUM";
-                dbf.colFilialka = "ICO2";
+                CSV csv = new CSV();
+                csv.colName = "NAZEV";
+                csv.colEan = "EAN1";
+                csv.colCount = "MN";
+                csv.colNC = "CJ";
+                csv.colDPH = "SAZDPH";
+                csv.date = "DATUM";
+                csv.filialka = "ICO2";
+                csv.docNumber = "CISDOK";
 
                 Document doc = new Document();
-                ArrayList<Row> rows = dbf.getRows(path, "CP852");
+                ArrayList<Row> rows = csv.getItems(path, ';', "Windows-1250");
+                String datum = "";
+                try {
+                    datum = rows.get(0).docDate;
+                    SimpleDateFormat sdf = new SimpleDateFormat("dd.mm.yy");
+                    if (datum.equals("")) {
+                        return null;
+                    }
+                    Date dat = sdf.parse(datum);
+                    sdf.applyPattern("yyyymmdd");
+                    datum = sdf.format(dat);
+                } catch (ParseException e) {
+                    System.err.println(e);
+                }
 
                 for (Row r : rows) {
-                    String prefixEan = r.ean.substring(0, 5);
-                    if (prefixEan.equals("00000")) {
-                        r.ean = r.ean.substring(5, r.ean.length());
-                    } else if (prefixEan.equals("0000")) {
-                        r.ean = r.ean.substring(4, r.ean.length());
+                    r.docDate = datum;
+                    if (r.ean.length() > 4) {
+                        String prefixEan = r.ean.substring(0, 5);
+                        if (prefixEan.equals("00000")) {
+                            r.ean = r.ean.substring(5, r.ean.length());
+                        } else if (prefixEan.equals("0000")) {
+                            r.ean = r.ean.substring(4, r.ean.length());
+                        }
                     }
                 }
                 rows = chooseFilialka(rows);
 
                 if (rows.size() > 0) {
-                    String datum = rows.get(0).docDate;
                     String cislo = rows.get(0).docNumber;
                     doc.setRows(rows);
                     doc.setSaveName(datum + "_" + cislo + ".csv");
@@ -548,12 +563,12 @@ public class Converter {
                 return doc;
             }
         };
-        unikom.addFilialka(milin, "003");
-        unikom.addFilialka(nemocnice, "004");
-        unikom.addFilialka(pec, "002");
-        unikom.addFilialka(vo, "006");
-        unikom.addFilialka(cashPB, "001");
-        unikom.setFilter("@unikom.cz");
+        unikom.addFilialka(milin, "A003");
+        unikom.addFilialka(nemocnice, "A004");
+        unikom.addFilialka(pec, "A002");
+        unikom.addFilialka(vo, "A006");
+        unikom.addFilialka(cashPB, "A001");
+        unikom.setFilter("nav@unikom.cz");
 
         /**
          * Definuji toner
