@@ -47,6 +47,8 @@ public class Converter {
     private final String cashPB = "01";
     private final String vo = "31";
     private final String jablonna = "25";
+    private final String milesov = "32";
+    private final String trebsko = "28";
     /**
      *
      */
@@ -228,7 +230,7 @@ public class Converter {
 
                     Document doc = new Document();
                     ArrayList<Row> rows = csv.getItems(path, ';', "Windows-1250");
-
+//                    double obchMarze = 12.00;
                     String datum = rows.get(0).docDate;
                     SimpleDateFormat sdf = new SimpleDateFormat("yyyymmdd");
                     if (datum.equals("")) {
@@ -244,6 +246,8 @@ public class Converter {
                     for (Iterator<Row> iterator = rows.iterator(); iterator.hasNext();) {
                         Row r = iterator.next();
                         r.docDate = datum;
+//                        double dph = Double.valueOf(r.dph);
+//                        r.nc =String.valueOf(Double.valueOf(r.nc)/(dph/100+1)*(1-obchMarze/100));
                         if (r.special.equals("R")) {
                             r.count = String.valueOf(Double.valueOf(r.count) * -1);
                         }
@@ -272,6 +276,7 @@ public class Converter {
         pnsD.addFilialka(jablonna, "6000056063");
         pnsD.addFilialka(zdice, "6000051461");
         pnsD.addFilialka(tocnik, "6000040892");
+        pnsD.addFilialka(milesov, "6000060928");
         pnsD.setName("1393");
         pnsD.setFilter("mailbot@pns.cz", "elektronická data", "data za dodávky za dny");
         /**
@@ -346,6 +351,8 @@ public class Converter {
         pns.addFilialka(pec, "5000065344");
         pns.addFilialka(zdice, "5000064794");
         pns.addFilialka(kozarovice, "5000067084");
+        pns.addFilialka(jablonna, "5000068738");
+        pns.addFilialka(milesov, "5000071825");
         pns.setName("1393");
         pns.setFilter("mailbot@pns.cz", "elektronická data", "PNS");
 
@@ -461,6 +468,9 @@ public class Converter {
         alimpex.addFilialka(kozarovice, "133901");
         alimpex.addFilialka(tocnik, "27050");
         alimpex.addFilialka(jablonna, "12365");
+        alimpex.addFilialka(milesov, "12393");
+        alimpex.addFilialka(trebsko, "136011");
+        
         alimpex.setFilter("@alimpex.cz");
 
         Dodavatel alimpexServus = new Dodavatel("0093") {
@@ -484,6 +494,7 @@ public class Converter {
                 if (spe.length > 0) {
                     String docNumber = spe[1];
                     String filialka = spe[0];
+//                    System.out.println("Filialka cislo "+filialka+" cislo "+docNumber);
                     for (Row r : rows) {
                         r.docNumber = docNumber;
 //                        System.out.println("filialka: "+filialka);
@@ -503,6 +514,7 @@ public class Converter {
             }
         };
         alimpexServus.addFilialka(jablonna, "12365");
+        alimpexServus.addFilialka(milesov, "12393");
         alimpexServus.setFilter("@servus-vlasim.cz");
 
         /**
@@ -613,6 +625,7 @@ public class Converter {
         toner.addFilialka(tocnik, "2334");
         toner.addFilialka(zdice, "2334");
         toner.addFilialka(jablonna, "3412");
+        toner.addFilialka(milesov, "1199");
         /**
          * PAC
          */
