@@ -11,6 +11,7 @@ import converter.ConverterManager;
 import converter.DBF;
 import converter.document.Document;
 import converter.PDFPac;
+import converter.TXT;
 import converter.document.Row;
 import downloader.DownloadManager;
 import downloader.EmailConnector;
@@ -660,6 +661,60 @@ public class Converter {
         pac.addFilialka(tocnik, "202638");
         pac.setFilter("@pekarnahorovice.cz", "Faktura");
 
+        
+        Dodavatel jas = new Dodavatel("0525") {
+            @Override
+            public Document readFile(String path) {
+                Document doc = new Document();
+                File f = new File(path);
+                String number = f.getName();
+                TXT jas = new TXT();
+                ArrayList<Row> rows = jas.getItems(path);
+                
+                //doc.setErrors(jas.getErrs());
+                
+                //doc.setNumberContractor(number);
+                doc.setFilialka(getActualFilialka());
+                if (rows!=null){
+                    rows = chooseFilialka(rows);
+                    doc.setRows(rows);
+                }else{
+                    return null;
+                }
+                
+//                for (Row r : doc.getRows()) {
+//                    r.docNumber = number;
+//                    //System.out.println("name "+r.name);
+//                }
+                doc.setName("0525");
+                doc.setSaveName(number + ".csv");
+                return doc;
+            }
+
+        };
+          jas.addFilialka(cashPB, "POBOCKA");
+          jas.addFilialka(milin, "POBOCKA1");
+          jas.addFilialka(nemocnice, "POBOCKA2");
+//          jas.addFilialka(milin, "POBOCKA3");
+//          jas.addFilialka(milin, "POBOCKA4");
+//          jas.addFilialka(milin, "POBOCKA5");
+//          jas.addFilialka(milin, "POBOCKA6");
+          jas.addFilialka(pec, "POBOCKA7");
+          jas.addFilialka(kozarovice, "POBOCKA8");
+          jas.addFilialka(milin, "POBOCKA9");
+          jas.addFilialka(jablonna, "POBOCKA10");
+          jas.addFilialka(milin, "POBOCKA11");
+          jas.addFilialka(milesov, "POBOCKA12");
+          jas.addFilialka(trebsko, "POBOCKA13");
+          
+//        pac.addFilialka(nemocnice, "312079");
+//        pac.addFilialka(pec, "312175");
+//        pac.addFilialka(milin, "312114");
+//        pac.addFilialka(zdice, "202688");
+//        pac.addFilialka(kozarovice, "325073");
+//        pac.addFilialka(tocnik, "202638");
+        jas.setFilter("neodpovidat@jas-cr.cz", "JAS CR");
+
         /**
          * Nacteni dodavatelu
          */
@@ -671,7 +726,7 @@ public class Converter {
         dodavatele.add(alimpexServus);
         dodavatele.add(unikom);
         dodavatele.add(vodicka);
-        dodavatele.add(toner);
+        dodavatele.add(jas);
 
         return dodavatele;
     }

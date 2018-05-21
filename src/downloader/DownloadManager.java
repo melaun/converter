@@ -19,6 +19,7 @@ import javax.mail.Session;
 import javax.mail.Store;
 import javax.mail.internet.MimeBodyPart;
 import converter.Dodavatel;
+import converter.TXT;
 import java.util.logging.Logger;
 
 /**
@@ -125,6 +126,10 @@ public class DownloadManager {
                             if (fileName.substring(fileName.length() - 4).equals(".zip")) {
                                 UnzipUtility unzipper = new UnzipUtility();
                                 unzipper.unzip(path + fileName, path);
+                            }
+                            if (fileName.substring(0, 3).equals("Jas")){
+                                TXT t = new TXT();
+                                t.separateFile(path+fileName,path);
                             }
                             logger.log(Level.INFO, "Stazeno {0}", file.getPath());
                         }
